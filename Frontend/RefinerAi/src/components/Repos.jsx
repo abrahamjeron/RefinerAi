@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useUser } from '../context/userContext.jsx';  
 
 function Repos() {
-  const [username, setUsername] = useState('');
   const [repos, setRepos] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { user } = useUser(); 
+  const username = user?.login;  // Added optional chaining
 
   const fetchRepos = async () => {
     setLoading(true);
@@ -22,19 +24,14 @@ function Repos() {
       setError(error.message);
       setRepos([]);
     }
-
+    console.log(username); // This should now log the username
     setLoading(false);
   };
 
   return (
     <div>
       <h2>Fetch GitHub Repositories</h2>
-      <input
-        type="text"
-        placeholder="Enter GitHub Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
+
       <button onClick={fetchRepos} disabled={!username || loading}>
         {loading ? 'Loading...' : 'Fetch Repos'}
       </button>
