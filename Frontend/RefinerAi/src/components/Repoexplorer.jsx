@@ -180,7 +180,6 @@ import axios from 'axios';
 import { getCorrectedCode } from '../utils/codeCorrector'; // Importing the function
 
 const token = import.meta.env.VITE_GITHUB_TOKEN
-
 const fetchContents = async (url, setError) => {
     try {
         const response = await axios.get(url, {
