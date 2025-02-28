@@ -5,10 +5,10 @@ import dotenv from "dotenv";
 
 // Load environment variables from .env file
 // dotenv.config();
-
+// import.meta.env.
 const model = new ChatGoogleGenerativeAI({
     modelName: "gemini-1.5-flash-latest",
-    apiKey: "AIzaSyBlY6dGU0u7iBlHle52xkat64VrNKKldL8",// Use env variable for security
+    apiKey: import.meta.env.VITE_GEMINI_API_KEY,
 });
 
 const parser = new JsonOutputParser();

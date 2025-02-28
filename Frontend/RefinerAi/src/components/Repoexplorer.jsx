@@ -179,7 +179,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { getCorrectedCode } from '../utils/codeCorrector'; // Importing the function
 
-const token = "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";
+const token = import.meta.env.VITE_GITHUB_TOKEN
 
 const fetchContents = async (url, setError) => {
     try {
