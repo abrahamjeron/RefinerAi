@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '../context/userContext.jsx';
 import Home from '../pages/Home.jsx';
 
-const CLIENT_ID = "Ov23liJ6iczMnaxubdGc";
+const client_id = import.meta.env.VITE_CLIENT_ID;
 
 function Auth() {
   const { user, setUser } = useUser();
@@ -106,7 +106,7 @@ function Auth() {
     sessionStorage.setItem("githubOAuthState", state);
     
     window.location.assign(
-      `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=user&state=${state}&redirect_uri=http://localhost:5173`
+      `https://github.com/login/oauth/authorize?client_id=${client_id}&scope=user&state=${state}&redirect_uri=http://localhost:5173`
     );
   }
 

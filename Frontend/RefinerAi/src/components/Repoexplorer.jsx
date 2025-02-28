@@ -1,9 +1,14 @@
 // import React, { useState } from 'react';
 // import axios from 'axios';
-
+// import { getCorrectedCode } from '../utils/codeCorrector'; // Importing the function
+// const token = "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"
 // const fetchContents = async (url, setError) => {
 //     try {
-//         const response = await axios.get(url);
+//         const response = await axios.get(url, {
+//             headers: {
+//                 Authorization: `token ${token}`, 
+//             },
+//         });
 //         const contents = response.data;
 //         const allFiles = [];
 
@@ -33,6 +38,7 @@
 //     const [error, setError] = useState(null);
 //     const [selectedFile, setSelectedFile] = useState(null);
 //     const [fileContent, setFileContent] = useState('');
+//     const [correctedContent, setCorrectedContent] = useState('');
 //     const [loading, setLoading] = useState(false);
 //     const [openFolders, setOpenFolders] = useState({});
 
@@ -73,12 +79,25 @@
 //             const decodedContent = atob(response.data.content);
 //             setFileContent(decodedContent);
 //             setSelectedFile(path);
+//             setCorrectedContent(''); // Reset corrected content
 //         } catch (err) {
 //             console.error('Error fetching file content:', err);
 //         } finally {
 //             setLoading(false);
 //         }
 //     };
+
+//     const handleCorrectCode = async () => {
+//         try {
+//             const corrected = await getCorrectedCode(fileContent);
+//             console.log('Corrected Code:', corrected); // Debugging line
+//             // Assuming corrected is an object with a key like { corrected_code: '...' }
+//             setFileContent(JSON.stringify(corrected.code, null, 2));
+//         } catch (error) {
+//             console.error('Error correcting code:', error);
+//         }
+//     };
+    
 
 //     const renderFileTree = (items, parentPath = '') => {
 //         return items.map((item) => {
@@ -142,6 +161,12 @@
 //                         {fileContent}
 //                     </pre>
 //                 )}
+//                 <button onClick={handleCorrectCode} style={{ padding: '8px', cursor: 'pointer', marginTop: '10px' }}>
+//                     Correct Code
+//                 </button>
+//                 <pre style={{ whiteSpace: 'pre-wrap', background: '#1e1e1e', color: '#b5cea8', padding: '20px' }}>
+//                     {correctedContent}
+//                 </pre>
 //             </div>
 //         </div>
 //     );
@@ -150,14 +175,19 @@
 // export default RepoViewer;
 
 
-// src/components/RepoViewer.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { getCorrectedCode } from '../utils/codeCorrector'; // Importing the function
 
+const token = import.meta.env.VITE_GITHUB_TOKEN
+
 const fetchContents = async (url, setError) => {
     try {
-        const response = await axios.get(url);
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `token ${token}`,
+            },
+        });
         const contents = response.data;
         const allFiles = [];
 
@@ -239,13 +269,20 @@ const RepoViewer = () => {
     const handleCorrectCode = async () => {
         try {
             const corrected = await getCorrectedCode(fileContent);
-            console.log('Corrected Code:', corrected); // Debugging line
-            // Assuming corrected is an object with a key like { corrected_code: '...' }
-            setFileContent(JSON.stringify(corrected.corrected_code, null, 2));
+            console.log('Corrected Code:', corrected); 
+    
+            // Check if the corrected result is an object and has a 'code' property
+            if (typeof corrected === 'object' && corrected.code) {
+                setCorrectedContent(corrected.code);
+            } else {
+                setCorrectedContent('Error: No corrected code found.');
+            }
         } catch (error) {
             console.error('Error correcting code:', error);
+            setCorrectedContent('Error: Unable to correct the code.');
         }
     };
+    
     
 
     const renderFileTree = (items, parentPath = '') => {
@@ -306,16 +343,45 @@ const RepoViewer = () => {
                 {loading ? (
                     <p>Loading...</p>
                 ) : (
-                    <pre style={{ whiteSpace: 'pre-wrap', background: '#282c34', color: '#61dafb', padding: '20px' }}>
-                        {fileContent}
-                    </pre>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                        {/* Left Side - File Content */}
+                        <div style={{ width: '50%', background: '#282c34', color: '#61dafb', padding: '20px', borderRadius: '8px' }}>
+                            <h3>Original Code</h3>
+                            <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto' }}>
+                                {fileContent}
+                            </pre>
+                        </div>
+
+                                                {/* Right Side - Corrected Code */}
+                        {/* Right Side - Corrected Code */}
+                        <div style={{ 
+                            width: '50%', 
+                            background: '#1e1e1e', 
+                            color: '#b5cea8', 
+                            padding: '20px', 
+                            borderRadius: '8px',
+                            overflowX: 'auto'
+                        }}>
+                            <h3>Corrected Code</h3>
+                            <pre style={{ 
+                                whiteSpace: 'pre-wrap', 
+                                overflowX: 'auto',
+                                color: '#dcdcdc', 
+                                backgroundColor: '#2d2d2d',
+                                padding: '10px',
+                                borderRadius: '4px',
+                                fontFamily: 'monospace'
+                            }}>
+                                {correctedContent || 'Click "Correct Code" to see the result'}
+                            </pre>
+                        </div>
+
+                    </div>
                 )}
+
                 <button onClick={handleCorrectCode} style={{ padding: '8px', cursor: 'pointer', marginTop: '10px' }}>
                     Correct Code
                 </button>
-                <pre style={{ whiteSpace: 'pre-wrap', background: '#1e1e1e', color: '#b5cea8', padding: '20px' }}>
-                    {correctedContent}
-                </pre>
             </div>
         </div>
     );
