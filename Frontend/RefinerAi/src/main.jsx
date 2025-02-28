@@ -8,3 +8,4 @@ createRoot(document.getElementById('root')).render(
 )
 
 // gemini api key AIzaSyBlY6dGU0u7iBlHle52xkat64VrNKKldL8
+// githubtoken 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

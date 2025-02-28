@@ -14,13 +14,13 @@ const model = new ChatGoogleGenerativeAI({
 const parser = new JsonOutputParser();
 
 export async function getCorrectedCode(fileContent) {
-    const promptTemplate = PromptTemplate.fromTemplate(
-        `I have the following code: ${fileContent} nI want you to correct the syntax.Return the corrected code in JSON format.`
-    );
-    
+    // Convert fileContent to a string to ensure correct interpolation
+    const safeContent = String(fileContent);
+
+    // Construct the prompt
+    const prompt = `I have the following code:\n${safeContent}\nI want you to correct the syntax. Return the corrected code in JSON format.`;
 
     try {
-        const prompt = await promptTemplate.format({});
         const response = await model.call([{ role: "user", content: prompt }]);
         const correctedCode = await parser.parse(response.text); 
         return correctedCode; // Return the corrected code
@@ -29,3 +29,4 @@ export async function getCorrectedCode(fileContent) {
         return "Error in getting corrected code.";
     }
 }
+
