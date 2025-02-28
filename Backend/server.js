@@ -1,13 +1,15 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
 const bodyParser = require('body-parser');
 
 const fetch = (...args) => 
   import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-const CLIENT_ID = "Ov23liJ6iczMnaxubdGc";
+const CLIENT_ID = process.env.CLIENT_ID;
+
 // SECURITY ISSUE: Never expose your client secret in client-side code or commit it to public repositories
-const CLIENT_SECRET = "3d665174d299bdbddea954dd94bd0a2641bcbedd";
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const app = express();
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));

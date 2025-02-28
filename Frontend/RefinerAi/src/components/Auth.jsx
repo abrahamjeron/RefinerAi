@@ -9,6 +9,7 @@ function Auth() {
   const [rerender, setRerender] = useState(false);
   const [userData, setUserData] = useState({});
   const [authError, setAuthError] = useState(null);
+  const backend_url = import.meta.env.VITE_BACKEND_LINK
 
   // Check for code in URL and get access token
   useEffect(() => {
@@ -40,7 +41,7 @@ function Auth() {
       if (localStorage.getItem("accessToken") === null) {
         async function getAccessToken() {
           try {
-            const response = await fetch(`http://localhost:3000/getAccessToken?code=${codeParam}&state=${stateParam}`, {
+            const response = await fetch(`${backend_url}/getAccessToken?code=${codeParam}&state=${stateParam}`, {
               method: "GET"
             });
             const data = await response.json();
@@ -67,7 +68,7 @@ function Auth() {
   useEffect(() => {
     const getUserData = async () => {
       try {
-        const response = await fetch("http://localhost:3000/getUserData", {
+        const response = await fetch(`${backend_url}/getUserData`, {
           method: "GET",
           headers: {
             "Authorization": "Bearer " + localStorage.getItem("accessToken")
