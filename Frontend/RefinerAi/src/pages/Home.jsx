@@ -1,5 +1,5 @@
 import React from 'react';
-import Repos from '../components/repos'
+// import Repos from '../components/repos'
 import RepoExplorer from '../components/Repoexplorer.jsx';
 import CodeDisplay from '../components/CodeDisplay.jsx';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +24,7 @@ function Home({userData}) {
             Logout
       </button>
       <CodeDisplay/>
-          <Repos/>
+          {/* <Repos/> */}
           <RepoExplorer owner={userData.login}  repo={'fake-instagram'} />
 
     </div>
