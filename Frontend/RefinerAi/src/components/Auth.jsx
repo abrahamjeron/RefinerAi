@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '../context/userContext.jsx';
+import Home from '../pages/Home.jsx';
 
 const CLIENT_ID = "Ov23liJ6iczMnaxubdGc";
 
@@ -124,17 +125,8 @@ function Auth() {
     <>
       {localStorage.getItem("accessToken") ? (
         <>
-          <h1>Welcome, {userData.login}!</h1>
-          {userData.avatar_url && <img src={userData.avatar_url} alt="Avatar" width="100" style={{ borderRadius: '50%' }} />}
-          <p>Name: {userData.login || 'Not provided'}</p>
-          <p>URL: <a href={userData.html_url} target="_blank" rel="noopener noreferrer">{userData.html_url}</a></p>
-          <button onClick={() => { 
-            localStorage.removeItem("accessToken"); 
-            setUser(null);  // Clear user data in context
-            setRerender(prev => !prev); 
-          }}>
-            Logout
-          </button>
+          <Home userData={userData} />
+        
         </>
       ) : (
         <>
