@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Home from './pages/Home';
 import Auth from './components/Auth';
 import { UserProvider } from "./context/userContext";
-// import './App.css';
+import './App.css';
 
 function App() {
   return (

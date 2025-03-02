@@ -132,7 +132,7 @@ function Auth() {
       ) : (
         <>
           {authError && <div style={{ color: 'red', margin: '10px 0' }}>{authError}</div>}
-          <button onClick={loginWithGithub}>
+          <button className='m-8' onClick={loginWithGithub}>
             Login with GitHub
           </button>
         </>
