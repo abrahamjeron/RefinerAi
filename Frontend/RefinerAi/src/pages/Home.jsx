@@ -16,7 +16,7 @@ function Home({userData}) {
   return (
   <div className="">
     <div className='m-[20px]'>
-        <LandingNavBar/>
+        <LandingNavBar userData={userData}/>
       </div>
       <Landingbox/>
         <LandingInfos/>

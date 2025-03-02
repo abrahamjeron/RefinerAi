@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Auth from './components/Auth';
@@ -7,15 +6,14 @@ import './App.css';
 
 function App() {
   return (
-    <>  
-      <UserProvider>
-        <Router>
-            <Routes>
-              <Route path='/' element={<Auth/>}/>
-            </Routes>
-        </Router>
-      </UserProvider>
-    </>
+    <UserProvider>
+      <Router>
+        <Routes>
+          <Route path='/auth' element={<Auth/>}/>
+          <Route path='/' element={<Home/>}/>
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 }
 

@@ -1,8 +1,13 @@
 import React from 'react'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 import Logo from '../assets/Logo.svg'
+import { useUser } from '../context/userContext.jsx';  
 
-function LandingNavBar() {
+function LandingNavBar({userData}) {
+    const { setUser } = useUser(); 
+    const navigate = useNavigate()
   return (
     <nav className='flex'>
         <Link className='flex items-center' onClick={()=>{console.log("clicked")}}>
@@ -29,10 +34,20 @@ function LandingNavBar() {
         <ul className="text-[#ffffffc2] items-center font-extralight text-[1.1rem] space-x-4 mr-4 flex ml-auto">
             <Link>
                 Contact
-            </Link>
-            <Link  className='bg-white rounded-3xl text-black py-[10px] px-[20px] text-[1rem]'>
-                Log in
-            </Link>
+            </Link>{    
+            localStorage.getItem("accessToken") ? 
+            <button className='bg-white rounded-3xl text-black py-[10px] px-[20px] text-[1rem]' onClick={() => { 
+        
+                localStorage.removeItem("accessToken"); 
+                navigate('/auth')
+                setUser(null);  // Clear user data in context
+              }}>
+                Logout
+          </button> : 
+                      <Link to='/auth' className='bg-white rounded-3xl text-black py-[10px] px-[20px] text-[1rem]'>
+                      Log in
+                  </Link>
+            }
         </ul>
     </nav>
   )

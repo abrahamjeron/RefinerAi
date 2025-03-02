@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '../context/userContext.jsx';
-import Home from '../pages/Home.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const client_id = import.meta.env.VITE_CLIENT_ID;
 
 function Auth() {
   const { user, setUser } = useUser();
-  const [rerender, setRerender] = useState(false);
-  const [userData, setUserData] = useState({});
   const [authError, setAuthError] = useState(null);
-  const backend_url = import.meta.env.VITE_BACKEND_LINK
+  const backend_url = import.meta.env.VITE_BACKEND_LINK;
+  const navigate = useNavigate();
 
   // Check for code in URL and get access token
   useEffect(() => {
@@ -37,68 +36,68 @@ function Auth() {
       // Clean up state from sessionStorage
       sessionStorage.removeItem("githubOAuthState");
 
-      // Only proceed if we don't already have a token
-      if (localStorage.getItem("accessToken") === null) {
-        async function getAccessToken() {
-          try {
-            const response = await fetch(`${backend_url}/getAccessToken?code=${codeParam}&state=${stateParam}`, {
-              method: "GET"
-            });
-            const data = await response.json();
-            
-            console.log("Access Token Data:", data);
-            if (data.error) {
-              setAuthError(`Authentication error: ${data.error_description || data.error}`);
-            } else if (data.access_token) {
-              localStorage.setItem("accessToken", data.access_token);
-              setRerender(prev => !prev);
-              window.history.pushState({}, document.title, "/"); // Clean URL after getting token
-            }
-          } catch (error) {
-            console.error("Error fetching access token:", error);
-            setAuthError("Failed to get access token. Please try again.");
+      // Process the auth code
+      async function getAccessToken() {
+        try {
+          const response = await fetch(`${backend_url}/getAccessToken?code=${codeParam}&state=${stateParam}`, {
+            method: "GET"
+          });
+          const data = await response.json();
+          
+          console.log("Access Token Data:", data);
+          if (data.error) {
+            setAuthError(`Authentication error: ${data.error_description || data.error}`);
+          } else if (data.access_token) {
+            localStorage.setItem("accessToken", data.access_token);
+            // Clean URL after getting token
+            window.history.pushState({}, document.title, "/auth");
+            // Fetch user data immediately after setting token
+            await getUserData(data.access_token);
+            // Navigate to home page after successful authentication
+            navigate('/');
           }
+        } catch (error) {
+          console.error("Error fetching access token:", error);
+          setAuthError("Failed to get access token. Please try again.");
         }
-        getAccessToken();
+      }
+      getAccessToken();
+    } else {
+      // Check if we already have a token and user data
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        getUserData(token);
       }
     }
-  }, [rerender]);
+  }, []);
 
-  // Fetch user data if access token is present
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const response = await fetch(`${backend_url}/getUserData`, {
-          method: "GET",
-          headers: {
-            "Authorization": "Bearer " + localStorage.getItem("accessToken")
-          }
-        });
-        const data = await response.json();
-        
-        if (data.error) {
-          console.error("Error in user data:", data.error);
-          setAuthError(data.error);
-          // Token might be invalid, clear it
-          if (response.status === 401) {
-            localStorage.removeItem("accessToken");
-            setRerender(prev => !prev);
-          }
-        } else {
-          setUser(data);  // Store user data in context
-          setUserData(data);
-          console.log("User Data:", data);
+  // Function to fetch user data
+  async function getUserData(token) {
+    try {
+      const response = await fetch(`${backend_url}/getUserData`, {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + token
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setAuthError("Failed to fetch user profile data");
+      });
+      const data = await response.json();
+      
+      if (data.error) {
+        console.error("Error in user data:", data.error);
+        setAuthError(data.error);
+        // Token might be invalid, clear it
+        if (response.status === 401) {
+          localStorage.removeItem("accessToken");
+        }
+      } else {
+        setUser(data);  // Store user data in context
+        console.log("User Data:", data);
       }
-    };
-
-    if (localStorage.getItem("accessToken")) {
-      getUserData();
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setAuthError("Failed to fetch user profile data");
     }
-  }, [rerender, setUser]);
+  }
 
   // GitHub login function
   function loginWithGithub() {
@@ -107,7 +106,7 @@ function Auth() {
     sessionStorage.setItem("githubOAuthState", state);
     
     window.location.assign(
-      `https://github.com/login/oauth/authorize?client_id=${client_id}&scope=user&state=${state}&redirect_uri=http://localhost:5173`
+      `https://github.com/login/oauth/authorize?client_id=${client_id}&scope=user&state=${state}&redirect_uri=http://localhost:5173/auth`
     );
   }
 
@@ -123,21 +122,22 @@ function Auth() {
 
   // JSX return
   return (
-    <>
-      {localStorage.getItem("accessToken") ? (
-        <>
-          <Home userData={userData} />
-        
-        </>
-      ) : (
-        <>
-          {authError && <div style={{ color: 'red', margin: '10px 0' }}>{authError}</div>}
-          <button className='m-8' onClick={loginWithGithub}>
+    <div className="flex justify-center items-center h-screen">
+      <div className="bg-gradient-to-b from-[#000000] to-[#350957] p-8 rounded-lg">
+        <h2 className="text-white text-2xl font-semibold mb-4 text-center">
+          Login to Refiner AI
+        </h2>
+        {authError && <div className="text-red-500 mb-4 text-center">{authError}</div>}
+        <div className="flex justify-center">
+          <button 
+            className="bg-white text-black py-2 px-4 rounded-3xl hover:bg-gray-200 transition"
+            onClick={loginWithGithub}
+          >
             Login with GitHub
           </button>
-        </>
-      )}
-    </>
+        </div>
+      </div>
+    </div>
   );
 }
 
