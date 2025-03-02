@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { getCorrectedCode } from '../utils/codeCorrector'; // Importing the function
+import { getCorrectedCode } from '../utils/codeCorrector';
 
-const token = import.meta.env.VITE_GITHUB_TOKEN
+const token = import.meta.env.VITE_GITHUB_TOKEN;
+
 const fetchContents = async (url, setError) => {
     try {
         const response = await axios.get(url, {
-            headers: {
-                Authorization: `token ${token}`,
-            },
+            headers: { Authorization: `token ${token}` },
         });
+
         const contents = response.data;
         const allFiles = [];
 
@@ -18,10 +19,7 @@ const fetchContents = async (url, setError) => {
                 allFiles.push(item);
             } else if (item.type === 'dir') {
                 const subDirContents = await fetchContents(item.url, setError);
-                allFiles.push({
-                    ...item,
-                    contents: subDirContents,
-                });
+                allFiles.push({ ...item, contents: subDirContents });
             }
         }
 
@@ -34,7 +32,8 @@ const fetchContents = async (url, setError) => {
 };
 
 const RepoViewer = () => {
-    const [repoUrl, setRepoUrl] = useState('');
+    const location = useLocation();
+    const repoUrl = location.state?.repoUrl || ''; 
     const [files, setFiles] = useState([]);
     const [error, setError] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -42,6 +41,17 @@ const RepoViewer = () => {
     const [correctedContent, setCorrectedContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [openFolders, setOpenFolders] = useState({});
+
+    useEffect(() => {
+        if (repoUrl) {
+            handleFetchRepo();
+        }
+    }, [repoUrl]);
+
+    const extractOwnerAndRepo = (url) => {
+        const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+        return match ? [match[1], match[2]] : [null, null];
+    };
 
     const handleFetchRepo = async () => {
         setError(null);
@@ -53,22 +63,12 @@ const RepoViewer = () => {
         }
 
         const url = `https://api.github.com/repos/${owner}/${repo}/contents`;
-
-        // Fetch all contents recursively
         const allFiles = await fetchContents(url, setError);
         setFiles(allFiles);
     };
 
-    const extractOwnerAndRepo = (url) => {
-        const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-        return match ? [match[1], match[2]] : [null, null];
-    };
-
     const toggleFolder = (path) => {
-        setOpenFolders((prev) => ({
-            ...prev,
-            [path]: !prev[path],
-        }));
+        setOpenFolders((prev) => ({ ...prev, [path]: !prev[path] }));
     };
 
     const fetchFileContent = async (path) => {
@@ -80,7 +80,7 @@ const RepoViewer = () => {
             const decodedContent = atob(response.data.content);
             setFileContent(decodedContent);
             setSelectedFile(path);
-            setCorrectedContent(''); // Reset corrected content
+            setCorrectedContent('');
         } catch (err) {
             console.error('Error fetching file content:', err);
         } finally {
@@ -91,9 +91,6 @@ const RepoViewer = () => {
     const handleCorrectCode = async () => {
         try {
             const corrected = await getCorrectedCode(fileContent);
-            console.log('Corrected Code:', corrected); 
-    
-            // Check if the corrected result is an object and has a 'code' property
             if (typeof corrected === 'object' && corrected.code) {
                 setCorrectedContent(corrected.code);
             } else {
@@ -104,8 +101,6 @@ const RepoViewer = () => {
             setCorrectedContent('Error: Unable to correct the code.');
         }
     };
-    
-    
 
     const renderFileTree = (items, parentPath = '') => {
         return items.map((item) => {
@@ -138,70 +133,29 @@ const RepoViewer = () => {
 
     return (
         <div style={{ display: 'flex', height: '100vh' }}>
-            {/* Left Panel - File Explorer */}
             <div style={{ width: '30%', background: '#2e2e2e', color: 'white', overflowY: 'auto', padding: '20px' }}>
                 <h2 style={{ color: '#61dafb' }}>File Explorer</h2>
-                <input
-                    type="text"
-                    value={repoUrl}
-                    onChange={(e) => setRepoUrl(e.target.value)}
-                    placeholder="Enter GitHub repo URL"
-                    style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-                />
-                <button onClick={handleFetchRepo} style={{ padding: '8px', cursor: 'pointer' }}>
-                    Fetch Repo
-                </button>
-
                 {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
-
                 <div style={{ marginTop: '20px' }}>{renderFileTree(files)}</div>
             </div>
 
-            {/* Right Panel - Code Viewer */}
             <div style={{ width: '70%', padding: '20px', overflowY: 'auto' }}>
-                <h2 style={{ color: '#61dafb' }}>
-                    {selectedFile ? selectedFile : 'Select a file to view'}
-                </h2>
+                <h2 style={{ color: '#61dafb' }}>{selectedFile ? selectedFile : 'Select a file to view'}</h2>
                 {loading ? (
                     <p>Loading...</p>
                 ) : (
                     <div style={{ display: 'flex', gap: '20px' }}>
-                        {/* Left Side - File Content */}
-                        <div style={{ width: '50%', background: '#282c34', color: '#61dafb', padding: '20px', borderRadius: '8px' }}>
+                        <div style={{ width: '50%', background: '#282c34', color: '#61dafb', padding: '20px' }}>
                             <h3>Original Code</h3>
-                            <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto' }}>
-                                {fileContent}
-                            </pre>
+                            <pre>{fileContent}</pre>
                         </div>
-
-                                                {/* Right Side - Corrected Code */}
-                        {/* Right Side - Corrected Code */}
-                        <div style={{ 
-                            width: '50%', 
-                            background: '#1e1e1e', 
-                            color: '#b5cea8', 
-                            padding: '20px', 
-                            borderRadius: '8px',
-                            overflowX: 'auto'
-                        }}>
+                        <div style={{ width: '50%', background: '#1e1e1e', color: '#b5cea8', padding: '20px' }}>
                             <h3>Corrected Code</h3>
-                            <pre style={{ 
-                                whiteSpace: 'pre-wrap', 
-                                overflowX: 'auto',
-                                color: '#dcdcdc', 
-                                backgroundColor: '#2d2d2d',
-                                padding: '10px',
-                                borderRadius: '4px',
-                                fontFamily: 'monospace'
-                            }}>
-                                {correctedContent || 'Click "Correct Code" to see the result'}
-                            </pre>
+                            <pre>{correctedContent || 'Click "Correct Code" to see the result'}</pre>
                         </div>
-
                     </div>
                 )}
-
-                <button onClick={handleCorrectCode} style={{ padding: '8px', cursor: 'pointer', marginTop: '10px' }}>
+                <button className='text-white' onClick={handleCorrectCode} style={{ padding: '8px', cursor: 'pointer', marginTop: '10px' }}>
                     Correct Code
                 </button>
             </div>

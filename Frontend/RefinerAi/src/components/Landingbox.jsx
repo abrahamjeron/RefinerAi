@@ -10,6 +10,7 @@ function Landingbox() {
     const checkLoggedIn = () => {
         const isLoggedIn = !!localStorage.getItem('accessToken'); 
         if (isLoggedIn) {
+            navigate('/dashboard');
             console.log("Logged in");
         } else {
             navigate('/auth'); 

@@ -1,11 +1,17 @@
 import React from 'react'
 import Repos from '../components/repos'
+import Header from '../components/header'
+import RepoSidebars from '../components/RepoSidebars'
 
 function dashboard() {
   return (
     <div>
-        dashboard
-        <Repos/>
+        <Header/>
+        <div className='flex'>
+          <RepoSidebars/>
+          <Repos/>
+        </div>
+   
     </div>
   )
 }
