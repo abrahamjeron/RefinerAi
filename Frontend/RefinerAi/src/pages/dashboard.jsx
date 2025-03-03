@@ -1,5 +1,5 @@
 import React from 'react'
-import Repos from '../components/repos'
+import Repos from '../components/Repos'
 import Header from '../components/header'
 import RepoSidebars from '../components/RepoSidebars'
 
