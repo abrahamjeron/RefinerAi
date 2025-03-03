@@ -90,7 +90,7 @@ function Repos() {
         onChange={(e) => setSearchTerm(e.target.value)}
       />  
 
-      <div className="h-screen overflow-y-auto mt-4">
+      <div className="h-screen overflow-y-scroll mt-4">
         {loading ? (
           <p className="text-center text-gray-400">Loading repositories...</p>
         ) : error ? (
