@@ -12,7 +12,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const app = express();
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: "https://refinerai-1.onrender.com", credentials: true }));
 app.use(bodyParser.json());
 
 // Get access token
@@ -39,7 +39,7 @@ app.get('/getAccessToken', async (req, res) => {
           client_id: CLIENT_ID,
           client_secret: CLIENT_SECRET,
           code: requestToken,
-          redirect_uri: "http://localhost:5173"
+          redirect_uri: "https://refinerai-1.onrender.com"
         })
       });      
     
